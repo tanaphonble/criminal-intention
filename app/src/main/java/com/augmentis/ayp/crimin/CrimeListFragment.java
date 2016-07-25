@@ -1,5 +1,6 @@
 package com.augmentis.ayp.crimin;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -12,7 +13,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.List;
 
@@ -21,9 +21,12 @@ import java.util.List;
  */
 public class CrimeListFragment extends Fragment {
 
+    private static final int REQUEST_UPDATED_CRIME = 300;
     private RecyclerView _crimeRecyclerView;
 
     private CrimeAdapter _adapter;
+
+    private int crimePos;
 
     protected static final String TAG = "CRIME_LIST";
 
@@ -46,10 +49,13 @@ public class CrimeListFragment extends Fragment {
     private void updateUI() {
         CrimeLab crimeLab = CrimeLab.getInstance();
         List<Crime> crimes = crimeLab.getCrimes();
-
-        _adapter = new CrimeAdapter(crimes);
-
-        _crimeRecyclerView.setAdapter(_adapter);
+        if (_adapter == null) {
+            _adapter = new CrimeAdapter(crimes);
+            _crimeRecyclerView.setAdapter(_adapter);
+        } else {
+//            _adapter.notifyDataSetChanged();
+            _adapter.notifyItemChanged(crimePos);
+        }
     }
 
     @Override
@@ -57,10 +63,28 @@ public class CrimeListFragment extends Fragment {
         super.onCreate(savedInstanceState);
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d(TAG, "Resume list");
+        updateUI();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_UPDATED_CRIME) {
+            if (resultCode == Activity.RESULT_OK) {
+                crimePos = (int) data.getExtras().get("position");
+                Log.d(TAG, "get crimePos = " + crimePos);
+            }
+        }
+    }
+
     private class CrimeHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public TextView _titleTextView;
         public TextView _dateTextView;
         public CheckBox _solvedCheckBox;
+        int _position;
 
         Crime _crime;
 
@@ -73,8 +97,9 @@ public class CrimeListFragment extends Fragment {
             itemView.setOnClickListener(this);
         }
 
-        public void bind(Crime crime) {
+        public void bind(Crime crime, int position) {
             _crime = crime;
+            _position = position;
             _titleTextView.setText(_crime.getTitle());
             _solvedCheckBox.setChecked(_crime.isSolved());
             _dateTextView.setText(_crime.getCrimeDate().toString());
@@ -82,10 +107,12 @@ public class CrimeListFragment extends Fragment {
 
         @Override
         public void onClick(View v) {
-            Intent intent = CrimeActivity.newIntent(getActivity(), _crime.getId());
-            startActivity(intent);
+            Intent intent = CrimeActivity.newIntent(getActivity(), _crime.getId(), _position);
+            //startActivity(intent);
+            startActivityForResult(intent, REQUEST_UPDATED_CRIME);
         }
     }
+
 
     private class CrimeAdapter extends RecyclerView.Adapter<CrimeHolder> {
         private List<Crime> _crimes;
@@ -98,7 +125,7 @@ public class CrimeListFragment extends Fragment {
         @Override
         public CrimeHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             viewCreatingCount++;
-            Log.d(TAG, "Create view holder for CrimeList : creating view time = " + viewCreatingCount);
+//            Log.d(TAG, "Create view holder for CrimeList : creating view time = " + viewCreatingCount);
             LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
             View v = layoutInflater.inflate(R.layout.list_item_crime, parent, false);
             return new CrimeHolder(v);
@@ -106,10 +133,10 @@ public class CrimeListFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(CrimeHolder holder, int position) {
-            Log.d(TAG, "Bind view holder for CrimeList : position = " + position);
+//            Log.d(TAG, "Bind view holder for CrimeList : position = " + position);
             Crime crime = _crimes.get(position);
 //            holder._titleTextView.setText(crime.getTitle());
-            holder.bind(crime);
+            holder.bind(crime, position);
         }
 
         @Override

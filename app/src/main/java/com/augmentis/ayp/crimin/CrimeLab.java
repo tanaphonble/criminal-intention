@@ -30,6 +30,15 @@ public class CrimeLab {
         }
     }
 
+    public int getCrimePositionById(UUID uuid) {
+        int position = 0;
+        for (Crime crime : crimeList) {
+            if (crime.getId().equals(uuid)) return position;
+        }
+        position++;
+        return -1;
+    }
+
     public Crime getCrimeById(UUID uuid) {
         for (Crime crime : crimeList) {
             if (crime.getId().equals(uuid)) {
@@ -38,6 +47,7 @@ public class CrimeLab {
         }
         return null;
     }
+
     public List<Crime> getCrimes() {
         return this.crimeList;
     }
