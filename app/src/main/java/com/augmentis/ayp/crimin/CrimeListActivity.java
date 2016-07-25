@@ -8,6 +8,4 @@ public class CrimeListActivity extends SingleFragmentActivity {
     protected Fragment onCreateFragment() {
         return new CrimeListFragment();
     }
-
-    
 }
