@@ -33,11 +33,12 @@ public class CrimeLab {
     }
 
     public int getCrimePositionById(UUID uuid) {
-        int position = 0;
-        for (Crime crime : crimeList) {
-            if (crime.getId().equals(uuid)) return position;
+        int size = crimeList.size();
+        for (int i = 0; i < size; i++) {
+            if (crimeList.get(i).getId().equals(uuid)){
+                return i;
+            }
         }
-        position++;
         return -1;
     }
 
