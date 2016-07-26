@@ -30,6 +30,8 @@ public class CrimeListFragment extends Fragment {
 
     protected static final String TAG = "CRIME_LIST";
 
+
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -47,7 +49,7 @@ public class CrimeListFragment extends Fragment {
      */
 
     private void updateUI() {
-        CrimeLab crimeLab = CrimeLab.getInstance();
+        CrimeLab crimeLab = CrimeLab.getInstance(getActivity());
         List<Crime> crimes = crimeLab.getCrimes();
         if (_adapter == null) {
             _adapter = new CrimeAdapter(crimes);
