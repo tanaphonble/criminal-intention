@@ -57,7 +57,7 @@ public class Crime {
         return new SimpleDateFormat("dd MMMM yyyy").format(date);
     }
 
-    public String getSmpleTimeFormet(Date date){
+    public String getSimpleTimeFormat(Date date){
         return new SimpleDateFormat("hh : mm a").format(date);
     }
 

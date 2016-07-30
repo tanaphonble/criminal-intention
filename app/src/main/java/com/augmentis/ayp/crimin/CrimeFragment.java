@@ -15,7 +15,6 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.TimePicker;
 
 import java.util.Date;
 import java.util.UUID;
@@ -117,7 +116,7 @@ public class CrimeFragment extends Fragment {
         });
 
         crimeTimeButton = (Button) v.findViewById(R.id.crime_time);
-        crimeTimeButton.setText(crime.getSmpleTimeFormet(crime.getCrimeDate()));
+        crimeTimeButton.setText(crime.getSimpleTimeFormat(crime.getCrimeDate()));
         crimeTimeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -159,7 +158,7 @@ public class CrimeFragment extends Fragment {
             Date date = (Date) data.getSerializableExtra(TimePickerFragment.EXTRA_TIME);
 
             crime.setCrimeDate(date);
-            crimeTimeButton.setText(crime.getSmpleTimeFormet(crime.getCrimeDate()));
+            crimeTimeButton.setText(crime.getSimpleTimeFormat(crime.getCrimeDate()));
         }
 
     }
