@@ -40,6 +40,7 @@ public class Crime {
         return crimeDate;
     }
 
+
     public void setCrimeDate(Date crimeDate) {
         this.crimeDate = crimeDate;
     }
@@ -54,6 +55,10 @@ public class Crime {
 
     public String getSimpleDateFormat(Date date) {
         return new SimpleDateFormat("dd MMMM yyyy").format(date);
+    }
+
+    public String getSmpleTimeFormet(Date date){
+        return new SimpleDateFormat("hh : mm a").format(date);
     }
 
     @Override

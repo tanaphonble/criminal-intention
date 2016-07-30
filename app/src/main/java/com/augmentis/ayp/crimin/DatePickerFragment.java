@@ -20,12 +20,12 @@ import java.util.GregorianCalendar;
  * Created by Tanaphon on 7/28/2016.
  */
 public class DatePickerFragment extends DialogFragment implements DialogInterface.OnClickListener {
-    protected static final String EXTRA_DATE = "EXTRA_DAT";
+    protected static final String EXTRA_DATE = "EXTRA_DATE";
 
     public static DatePickerFragment newInstance (Date date) {
         DatePickerFragment datePickerFragment = new DatePickerFragment();
         Bundle args = new Bundle();
-        args.putSerializable("ARG_DATE", date);
+        args.putSerializable(EXTRA_DATE, date);
         datePickerFragment.setArguments(args);
         return datePickerFragment;
     }
@@ -35,7 +35,7 @@ public class DatePickerFragment extends DialogFragment implements DialogInterfac
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        Date date = (Date) getArguments().getSerializable("ARG_DATE");
+        Date date = (Date) getArguments().getSerializable(EXTRA_DATE);
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
@@ -59,7 +59,12 @@ public class DatePickerFragment extends DialogFragment implements DialogInterfac
         int dayOfMonth = _datePicker.getDayOfMonth();
         int month = _datePicker.getMonth();
         int year = _datePicker.getYear();
-        Date date = new GregorianCalendar(year, month, dayOfMonth).getTime();
+        Date mDate =(Date) getArguments().getSerializable(EXTRA_DATE);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(mDate);
+        int hour = calendar.get(Calendar.HOUR);
+        int minute = calendar.get(Calendar.MINUTE);
+        Date date = new GregorianCalendar(year, month, dayOfMonth, hour, minute).getTime();
         sendResult(Activity.RESULT_OK, date);
     }
 
@@ -67,7 +72,6 @@ public class DatePickerFragment extends DialogFragment implements DialogInterfac
         if(getTargetFragment() == null){
             return;
         }
-
         Intent intent = new Intent();
         intent.putExtra(EXTRA_DATE, date);
 
