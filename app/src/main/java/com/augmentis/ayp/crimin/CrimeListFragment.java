@@ -16,6 +16,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import java.util.Arrays;
@@ -111,6 +112,7 @@ public class CrimeListFragment extends Fragment {
         updateSubtitle();
     }
 
+
     private void updateSubtitle() {
         CrimeLab crimeLab = CrimeLab.getInstance(getActivity());
         int crimeCount = crimeLab.getCrimes().size();
@@ -150,11 +152,17 @@ public class CrimeListFragment extends Fragment {
             itemView.setOnClickListener(this);
         }
 
-        public void bind(Crime crime, int position) {
+        public void bind(final Crime crime, int position) {
             _crime = crime;
             _position = position;
             _titleTextView.setText(_crime.getTitle());
             _solvedCheckBox.setChecked(_crime.isSolved());
+            _solvedCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    _crime.setSolved(isChecked);
+                }
+            });
             _dateTextView.setText(_crime.getCrimeDate().toString());
         }
 
