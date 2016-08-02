@@ -14,6 +14,7 @@ public class CrimeActivity extends SingleFragmentActivity {
         Intent intent = new Intent(context, CrimeActivity.class);
         intent.putExtra(CRIME_ID, id);
         return intent;
+
     }
 
     @Override

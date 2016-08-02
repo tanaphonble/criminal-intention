@@ -74,6 +74,10 @@ public class Crime {
         return new SimpleDateFormat("hh : mm a").format(date);
     }
 
+    public String getSimpleTimeFormat(Date date, String format){
+        return new SimpleDateFormat(format).format(date);
+    }
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();

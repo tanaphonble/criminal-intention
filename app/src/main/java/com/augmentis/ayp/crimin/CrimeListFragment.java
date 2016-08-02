@@ -33,6 +33,7 @@ public class CrimeListFragment extends Fragment {
     private static final String SUBTITLE_VISIBLE_STATE = "SUBTITLE_VISIBLE";
     private RecyclerView _crimeRecyclerView;
     private CrimeAdapter _adapter;
+    private TextView _textViewSuggestAdd;
 
     protected static final String TAG = "CRIME_LIST";
 
@@ -44,6 +45,14 @@ public class CrimeListFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_crime_list, container, false);
         _crimeRecyclerView = (RecyclerView) v.findViewById(R.id.crime_recycler_view);
         _crimeRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        _textViewSuggestAdd = (TextView) v.findViewById(R.id.text_view_suggest_add_first_crime);
+        if (CrimeLab.getInstance(getActivity()).getCrimes().size() == 0 )
+            _textViewSuggestAdd.setVisibility(View.VISIBLE);
+        else {
+            _textViewSuggestAdd.setVisibility(View.INVISIBLE);
+        }
+
+
         if (savedInstanceState != null) {
             _subtitleVisible = savedInstanceState.getBoolean(SUBTITLE_VISIBLE_STATE);
         }

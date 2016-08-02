@@ -73,5 +73,13 @@
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"/>
 
+    <Button
+        android:id="@+id/button_call_suspect_crime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:text="@string/call_suspect_crime"/>
+
 
 </LinearLayout>
