@@ -16,6 +16,9 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 
+import com.augmentis.ayp.crimin.model.Crime;
+import com.augmentis.ayp.crimin.model.CrimeLab;
+
 import java.util.Date;
 import java.util.UUID;
 
@@ -58,8 +61,10 @@ public class CrimeFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        CrimeLab crimeLab = CrimeLab.getInstance(getActivity());
         UUID crimeId = (UUID) getArguments().getSerializable(CRIME_ID);
-        crime = CrimeLab.getInstance(getActivity()).getCrimeById(crimeId);
+        crime = crimeLab.getCrimeById(crimeId);
     }
 
 
@@ -96,7 +101,8 @@ public class CrimeFragment extends Fragment {
         deleteCrimeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                CrimeLab.getInstance(getActivity()).deleteCrimeById(crime.getId());
+                //CrimeLab.getInstance(getActivity()).deleteCrimeById(crime.getId());
+                CrimeLab.getInstance(getActivity()).deleteCrime(crime.getId());
                 getActivity().finish();
             }
         });
@@ -134,13 +140,10 @@ public class CrimeFragment extends Fragment {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 crime.setSolved(isChecked);
-                Log.d(CrimeListFragment.TAG, "Crime:" + crime.toString());
             }
         });
-
         Intent intent = new Intent();
         getActivity().setResult(Activity.RESULT_OK, intent);
-
         return v;
     }
 
@@ -151,15 +154,18 @@ public class CrimeFragment extends Fragment {
         }
         if (requestCode == REQUEST_DATE) {
             Date date = (Date) data.getSerializableExtra(DatePickerFragment.EXTRA_DATE);
-
             crime.setCrimeDate(date);
             crimeDateButton.setText(crime.getSimpleDateFormat(crime.getCrimeDate()));
-        }else if(requestCode == REQUEST_TIME){
+        } else if (requestCode == REQUEST_TIME) {
             Date date = (Date) data.getSerializableExtra(TimePickerFragment.EXTRA_TIME);
-
             crime.setCrimeDate(date);
             crimeTimeButton.setText(crime.getSimpleTimeFormat(crime.getCrimeDate()));
         }
+    }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        CrimeLab.getInstance(getActivity()).updateCrime(crime); // update crime in db
     }
 }

@@ -1,6 +1,5 @@
 package com.augmentis.ayp.crimin;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -19,7 +18,9 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 
-import java.util.Arrays;
+import com.augmentis.ayp.crimin.model.Crime;
+import com.augmentis.ayp.crimin.model.CrimeLab;
+
 import java.util.List;
 
 
@@ -33,8 +34,6 @@ public class CrimeListFragment extends Fragment {
     private RecyclerView _crimeRecyclerView;
     private CrimeAdapter _adapter;
 
-    private Integer[] crimePos;
-
     protected static final String TAG = "CRIME_LIST";
 
     private boolean _subtitleVisible;
@@ -45,11 +44,9 @@ public class CrimeListFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_crime_list, container, false);
         _crimeRecyclerView = (RecyclerView) v.findViewById(R.id.crime_recycler_view);
         _crimeRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-
-        if(savedInstanceState != null){
+        if (savedInstanceState != null) {
             _subtitleVisible = savedInstanceState.getBoolean(SUBTITLE_VISIBLE_STATE);
         }
-
         updateUI();
 
         return v;
@@ -59,15 +56,12 @@ public class CrimeListFragment extends Fragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.crime_list_menu, menu);
-
         MenuItem menuItem = menu.findItem(R.id.menu_item_show_subtitle);
-
         if (_subtitleVisible) {
             menuItem.setTitle(R.string.hide_subtitle);
         } else {
             menuItem.setTitle(R.string.show_subtitle);
         }
-
     }
 
     @Override
@@ -82,7 +76,7 @@ public class CrimeListFragment extends Fragment {
         switch (item.getItemId()) {
             case R.id.menu_item_new_crime:
                 Crime crime = new Crime();
-                CrimeLab.getInstance(getActivity()).addCrime(crime); // TODO: Add addCrime to Crime
+                CrimeLab.getInstance(getActivity()).addCrime(crime);
                 Intent intent = CrimePagerActivity.newIntent(getActivity(), crime.getId(), true);
                 startActivity(intent);
                 return true;
@@ -107,6 +101,7 @@ public class CrimeListFragment extends Fragment {
             _adapter = new CrimeAdapter(crimes);
             _crimeRecyclerView.setAdapter(_adapter);
         } else {
+            _adapter.setCrimes(crimeLab.getCrimes());
             _adapter.notifyDataSetChanged();
         }
         updateSubtitle();
@@ -117,7 +112,7 @@ public class CrimeListFragment extends Fragment {
         CrimeLab crimeLab = CrimeLab.getInstance(getActivity());
         int crimeCount = crimeLab.getCrimes().size();
         String subtitle = getString(R.string.subtitle_format, crimeCount);
-        if(!_subtitleVisible){
+        if (!_subtitleVisible) {
             subtitle = null;
         }
         AppCompatActivity appCompatActivity = (AppCompatActivity) getActivity();
@@ -161,6 +156,7 @@ public class CrimeListFragment extends Fragment {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     _crime.setSolved(isChecked);
+                    CrimeLab.getInstance(getActivity()).updateCrime(_crime);
                 }
             });
             _dateTextView.setText(_crime.getCrimeDate().toString());
@@ -178,6 +174,10 @@ public class CrimeListFragment extends Fragment {
         private List<Crime> _crimes;
 
         public CrimeAdapter(List<Crime> crimes) {
+            _crimes = crimes;
+        }
+
+        protected void setCrimes(List<Crime> crimes) {
             _crimes = crimes;
         }
 

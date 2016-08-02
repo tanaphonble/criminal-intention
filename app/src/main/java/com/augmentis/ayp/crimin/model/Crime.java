@@ -1,4 +1,4 @@
-package com.augmentis.ayp.crimin;
+package com.augmentis.ayp.crimin.model;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -13,10 +13,18 @@ public class Crime {
     private String title;
     private Date crimeDate;
     private boolean solved;
+    private String suspect;
+
+    public String getSuspect() {
+        return suspect;
+    }
+
+    public void setSuspect(String suspect) {
+        this.suspect = suspect;
+    }
 
     public Crime() {
-        id = UUID.randomUUID();
-        crimeDate = new Date();
+        this(UUID.randomUUID());
     }
 
     public UUID getId() {
@@ -45,6 +53,11 @@ public class Crime {
         this.crimeDate = crimeDate;
     }
 
+    public Crime(UUID uuid){
+        this.id = uuid;
+        crimeDate = new Date();
+    }
+
     public boolean isSolved() {
         return solved;
     }
@@ -68,6 +81,7 @@ public class Crime {
         builder.append(",Title ").append(title);
         builder.append(",Crime Date ").append(getSimpleDateFormat(crimeDate));
         builder.append(",Solved ").append(solved);
+        builder.append(",Suspect ").append(suspect);
         return builder.toString();
     }
 }

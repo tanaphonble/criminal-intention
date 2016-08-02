@@ -1,4 +1,4 @@
-package com.augmentis.ayp.crimin;
+ package com.augmentis.ayp.crimin;
 
 import android.content.Context;
 import android.content.Intent;
@@ -21,4 +21,3 @@ public class CrimeActivity extends SingleFragmentActivity {
         return new CrimeFragment();
     }
 }
-
