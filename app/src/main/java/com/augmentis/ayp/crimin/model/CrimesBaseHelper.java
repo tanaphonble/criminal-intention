@@ -12,13 +12,14 @@ import com.augmentis.ayp.crimin.model.CrimeDBSchema.CrimeTable;
  */
 public class CrimesBaseHelper extends SQLiteOpenHelper {
 
-    private static final int VERSION = 4;
+    private static final int VERSION = 5;
     private static final String DATABASE_MAME = "crimeBase.db";
     private static final String TAG = "CrimeBaseHelper";
 
     public CrimesBaseHelper(Context context) {
         super(context, DATABASE_MAME, null, VERSION);
     }
+
 
     @Override
     public void onCreate(SQLiteDatabase db) {
@@ -33,6 +34,20 @@ public class CrimesBaseHelper extends SQLiteOpenHelper {
                 + CrimeTable.Cols.SUSPECT + ")"
         );
     }
+
+//    @Override
+//    public void onCreate(SQLiteDatabase db) {
+//        Log.d(TAG, "Create Database");
+//        db.execSQL("CREATE TABLE " + CrimeTable.NAME
+//                + "("
+//                + "_id INTEGER PRIMARY KEY AUTOINCREMENT, "
+//                + CrimeTable.Cols.UUID + ","
+//                + CrimeTable.Cols.TITLE + ","
+//                + CrimeTable.Cols.DATE + ","
+//                + CrimeTable.Cols.SOLVED + ","
+//                + CrimeTable.Cols.SUSPECT + ")"
+//        );
+//    }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {

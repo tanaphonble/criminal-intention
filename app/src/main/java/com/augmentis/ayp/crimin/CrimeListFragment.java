@@ -1,5 +1,6 @@
 package com.augmentis.ayp.crimin;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -46,12 +47,6 @@ public class CrimeListFragment extends Fragment {
         _crimeRecyclerView = (RecyclerView) v.findViewById(R.id.crime_recycler_view);
         _crimeRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         _textViewSuggestAdd = (TextView) v.findViewById(R.id.text_view_suggest_add_first_crime);
-        if (CrimeLab.getInstance(getActivity()).getCrimes().size() == 0 )
-            _textViewSuggestAdd.setVisibility(View.VISIBLE);
-        else {
-            _textViewSuggestAdd.setVisibility(View.INVISIBLE);
-        }
-
 
         if (savedInstanceState != null) {
             _subtitleVisible = savedInstanceState.getBoolean(SUBTITLE_VISIBLE_STATE);
@@ -99,10 +94,6 @@ public class CrimeListFragment extends Fragment {
         }
     }
 
-    /**
-     * Update UI
-     */
-
     private void updateUI() {
         CrimeLab crimeLab = CrimeLab.getInstance(getActivity());
         List<Crime> crimes = crimeLab.getCrimes();
@@ -112,6 +103,12 @@ public class CrimeListFragment extends Fragment {
         } else {
             _adapter.setCrimes(crimeLab.getCrimes());
             _adapter.notifyDataSetChanged();
+        }
+
+        if (CrimeLab.getInstance(getActivity()).getCrimes().size() == 0 )
+            _textViewSuggestAdd.setVisibility(View.VISIBLE);
+        else {
+            _textViewSuggestAdd.setVisibility(View.INVISIBLE);
         }
         updateSubtitle();
     }

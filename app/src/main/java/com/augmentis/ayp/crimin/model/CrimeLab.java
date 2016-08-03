@@ -50,9 +50,6 @@ public class CrimeLab {
 
     private SQLiteDatabase database;
 
-    public void deleteCrimeById(UUID uuid) {
-    }
-
     public Crime getCrimeById(UUID uuid) {
         CrimeCursorWrapper cursor = queryCrimes(CrimeTable.Cols.UUID + " = ? ",
                 new String[]{uuid.toString()});
@@ -82,16 +79,16 @@ public class CrimeLab {
     public List<Crime> getCrimes() {
         List<Crime> crimes = new ArrayList<>();
 
-        CrimeCursorWrapper cursor = queryCrimes(null, null);
+        CrimeCursorWrapper crimeCursorWrapper = queryCrimes(null, null);
 
         try {
-            cursor.moveToFirst();
-            while (!cursor.isAfterLast()) {
-                crimes.add(cursor.getCrime());
-                cursor.moveToNext();
+            crimeCursorWrapper.moveToFirst();
+            while (!crimeCursorWrapper.isAfterLast()) {
+                crimes.add(crimeCursorWrapper.getCrime());
+                crimeCursorWrapper.moveToNext();
             }
         } finally {
-            cursor.close();
+            crimeCursorWrapper.close();
         }
 
         return crimes;
