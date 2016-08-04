@@ -36,6 +36,7 @@ public class Crime {
     }
 
 
+
     public String getTitle() {
         return title;
     }
@@ -77,6 +78,12 @@ public class Crime {
     public String getSimpleTimeFormat(Date date, String format){
         return new SimpleDateFormat(format).format(date);
     }
+
+    public String getPhotoFilename(){
+        return "IMG_" + getId().toString() + ".jpg";
+    }
+
+
 
     @Override
     public String toString() {
