@@ -9,11 +9,7 @@ import com.augmentis.ayp.crimin.model.Crime;
 import java.util.UUID;
 
 public class CrimePagerActivity extends SingleFragmentActivity implements CrimeFragment.CallBacks {
-
-    private static final String IS_ON_ADD_NEW_CRIME = "IS_ON_ADD_NEW_CRIME" ;
-
     private UUID _crimeId;
-    private boolean _isNewCrime;
 
     @Override
     protected int getLayoutResId() {
@@ -23,16 +19,14 @@ public class CrimePagerActivity extends SingleFragmentActivity implements CrimeF
     @Override
     protected Fragment onCreateFragment() {
         _crimeId = (UUID) getIntent().getSerializableExtra(CRIME_ID);
-        _isNewCrime = (boolean) getIntent().getSerializableExtra(IS_ON_ADD_NEW_CRIME);
-        return CrimeFragment.newInstance(_crimeId, _isNewCrime);
+        return CrimeFragment.newInstance(_crimeId);
     }
 
     protected static final String CRIME_ID = "crimePagerActivity.crimeId";
 
-    public static Intent newIntent(Context activity, UUID id, boolean isOnAddNewCrime) {
+    public static Intent newIntent(Context activity, UUID id) {
         Intent intent = new Intent(activity, CrimePagerActivity.class);
         intent.putExtra(CRIME_ID, id);
-        intent.putExtra(IS_ON_ADD_NEW_CRIME, isOnAddNewCrime);
         return intent;
     }
 

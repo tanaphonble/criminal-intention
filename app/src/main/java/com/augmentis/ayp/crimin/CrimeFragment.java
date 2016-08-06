@@ -75,17 +75,14 @@ public class CrimeFragment extends Fragment {
     private ImageButton photoButton;
     private ImageView photoView;
     private CallBacks callBacks;
-
-    private boolean isOnAddNewCrime;
-
+    int nextCrimePos;
 
     public CrimeFragment() {
     }
 
-    public static CrimeFragment newInstance(UUID crimeId, boolean isOnAdd) {
+    public static CrimeFragment newInstance(UUID crimeId) {
         Bundle args = new Bundle();
         args.putSerializable(CRIME_ID, crimeId);
-        args.putBoolean(IS_ON_ADD_NEW_CRIME, isOnAdd);
         CrimeFragment crimeFragment = new CrimeFragment();
         crimeFragment.setArguments(args);
         return crimeFragment;
@@ -120,7 +117,8 @@ public class CrimeFragment extends Fragment {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
         reloadCrimeFromDB();
-        photoFile = CrimeLab.getInstance(getActivity()).getPhotoFile(crime);
+        if(crime != null)
+            photoFile = CrimeLab.getInstance(getActivity()).getPhotoFile(crime);
     }
 
     private void editTextCrimeSetting() {
@@ -205,11 +203,6 @@ public class CrimeFragment extends Fragment {
 
     private void crimeSuspectButtonSetting() {
         final Intent pickContact = new Intent(Intent.ACTION_PICK, ContactsContract.CommonDataKinds.Phone.CONTENT_URI);
-//        Log.d("ggwp", "uri: CommonDataKinds.Phone.CONTENT_FILTER_URI --> " + ContactsContract.CommonDataKinds.Phone.CONTENT_FILTER_URI);
-//        Log.d("ggwp", "uri: CommonDataKinds.Phone.CONTENT_URI --> " + ContactsContract.CommonDataKinds.Phone.CONTENT_URI);
-//        Log.d("ggwp", "uri: Contacts.DISPLAY_NAME --> " + ContactsContract.Contacts.DISPLAY_NAME);
-//        Log.d("ggwp", "uri: CommonDataKinds.Phone.TYPE_MOBILE --> " + ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE);
-//        Log.d("ggwp", "uri: CommonDataKinds.Identity.DISPLAY_NAME --> " + ContactsContract.CommonDataKinds.Identity.DISPLAY_NAME);
 
         crimeSuspectButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -224,9 +217,9 @@ public class CrimeFragment extends Fragment {
 
         PackageManager packageManager = getActivity().getPackageManager();
 
-//        if (packageManager.resolveActivity(pickContact, PackageManager.MATCH_DEFAULT_ONLY) == null) {
-//            crimeSuspectButton.setEnabled(false);
-//        }
+        if (packageManager.resolveActivity(pickContact, PackageManager.MATCH_DEFAULT_ONLY) == null) {
+            crimeSuspectButton.setEnabled(false);
+        }
     }
 
     private void crimeCallSuspectButtonSetting() {
@@ -242,7 +235,9 @@ public class CrimeFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_item_delete_crime:
-                CrimeLab.getInstance(getActivity()).deleteCrime(crime.getId());
+                CrimeLab crimeLab = CrimeLab.getInstance(getActivity());
+                nextCrimePos = crimeLab.getCrimePosById(crime.getId());
+                crimeLab.deleteCrime(crime.getId());
                 callBacks.onCrimeDeleted();
                 return true;
             default:
@@ -273,8 +268,6 @@ public class CrimeFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_crime, container, false);
-        isOnAddNewCrime = getArguments().getBoolean(IS_ON_ADD_NEW_CRIME);
-
         photoButton = (ImageButton) v.findViewById(R.id.crime_camera);
         photoView = (ImageView) v.findViewById(R.id.crime_photo);
         photoViewSetting();
@@ -430,27 +423,26 @@ public class CrimeFragment extends Fragment {
         }
     }
 
+    public Crime getNextCrime(){
+        CrimeLab crimeLab = CrimeLab.getInstance(getActivity());
+        Crime nextCrime = null;
+        try {
+            nextCrime= crimeLab.getCrimes().get(nextCrimePos);
+        }finally {
+            try {
+                if(nextCrime == null)
+                    nextCrime = crimeLab.getCrimes().get(0);
+            } finally {
+                return nextCrime;
+            }
+        }
+
+    }
+
     @Override
     public void onPause() {
         super.onPause();
-//        updateCrime();
-//        CrimeLab.getInstance(getActivity()).updateCrime(crime); // update crime in db
     }
-
-    public UUID getCrimeId(){
-        if(this.crime != null) {
-            return this.crime.getId();
-        }
-        else {
-            return null;
-        }
-    }
-
-    public void updateUI(){
-        reloadCrimeFromDB();
-        crimeSolvedCheckbox.setChecked(crime.isSolved());
-    }
-
 
     private void updateCrime() {
         CrimeLab.getInstance(getActivity()).updateCrime(crime);

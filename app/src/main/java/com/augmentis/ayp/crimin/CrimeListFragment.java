@@ -46,7 +46,7 @@ public class CrimeListFragment extends Fragment {
     private Callbacks callbacks;
 
     public interface Callbacks{
-        void onCrimeSelected(Crime crime, boolean isNewCrime);
+        void onCrimeSelected(Crime crime);
     }
 
     @Override
@@ -94,7 +94,7 @@ public class CrimeListFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         if(CrimeLab.getInstance(getActivity()).getCrimes().size() > 0) {
-            callbacks.onCrimeSelected(CrimeLab.getInstance(getActivity()).getCrimes().get(0), false);
+            callbacks.onCrimeSelected(CrimeLab.getInstance(getActivity()).getCrimes().get(0));
         }
 
         setHasOptionsMenu(true);
@@ -109,7 +109,7 @@ public class CrimeListFragment extends Fragment {
 
                 // support table
                 updateUI();
-                callbacks.onCrimeSelected(crime, true);
+                callbacks.onCrimeSelected(crime);
 
                 return true;
             case R.id.menu_item_show_subtitle:
@@ -197,7 +197,7 @@ public class CrimeListFragment extends Fragment {
                     if(buttonView.isPressed()) {
                         _crime.setSolved(isChecked);
                         CrimeLab.getInstance(getActivity()).updateCrime(_crime);
-                        callbacks.onCrimeSelected(_crime, false);
+                        callbacks.onCrimeSelected(_crime);
                     }
                 }
             });
@@ -206,7 +206,7 @@ public class CrimeListFragment extends Fragment {
 
         @Override
         public void onClick(View v) {
-            callbacks.onCrimeSelected(_crime, false);
+            callbacks.onCrimeSelected(_crime);
         }
     }
 

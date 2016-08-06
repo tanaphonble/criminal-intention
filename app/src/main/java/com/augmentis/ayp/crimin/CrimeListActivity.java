@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.support.v4.app.Fragment;
 
 import com.augmentis.ayp.crimin.model.Crime;
+import com.augmentis.ayp.crimin.model.CrimeLab;
 
 public class CrimeListActivity extends SingleFragmentActivity
         implements CrimeListFragment.Callbacks, CrimeFragment.CallBacks {
@@ -14,10 +15,10 @@ public class CrimeListActivity extends SingleFragmentActivity
     }
 
     @Override
-    public void onCrimeSelected(Crime crime, boolean isNewCrime) {
-        if (findViewById(R.id.detail_fragment_ontainer) == null) {
+    public void onCrimeSelected(Crime crime) {
+        if (findViewById(R.id.detail_fragment_container) == null) {
             // single pane
-            Intent intent = CrimePagerActivity.newIntent(this, crime.getId(), isNewCrime);
+            Intent intent = CrimePagerActivity.newIntent(this, crime.getId());
         } else {
 
 //            CrimeFragment currentDetailFragment = (CrimeFragment) getSupportFragmentManager()
@@ -25,12 +26,12 @@ public class CrimeListActivity extends SingleFragmentActivity
 
 //            if (currentDetailFragment != null && currentDetailFragment.getCrimeId().equals(crime.getId())) {
 
-                Fragment newDetailFragment = CrimeFragment.newInstance(crime.getId(), isNewCrime);
+            Fragment newDetailFragment = CrimeFragment.newInstance(crime.getId());
 
-                getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.detail_fragment_ontainer, newDetailFragment)
-                        .commit();
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.detail_fragment_container, newDetailFragment)
+                    .commit();
 //            }
 
 //            else {
@@ -53,7 +54,7 @@ public class CrimeListActivity extends SingleFragmentActivity
         CrimeListFragment listFragment = (CrimeListFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.fragment_container);
         CrimeFragment detailFragment = (CrimeFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.detail_fragment_ontainer);
+                .findFragmentById(R.id.detail_fragment_container);
 
         listFragment.updateUI();
 
@@ -61,5 +62,10 @@ public class CrimeListActivity extends SingleFragmentActivity
                 .beginTransaction()
                 .detach(detailFragment)
                 .commit();
+
+        Crime nextCrime = detailFragment.getNextCrime();
+        if(nextCrime == null)
+            return;
+        onCrimeSelected(nextCrime);
     }
 }

@@ -97,6 +97,17 @@ public class CrimeLab {
 
     }
 
+    public int getCrimePosById(UUID uuid) {
+        int crimePos = 0;
+        for(Crime crime : getCrimes()){
+            if (crime.getId().equals(uuid))
+                return crimePos;
+            else
+                crimePos++;
+        }
+        return -1;
+    }
+
     public void addCrime(Crime crime) {
         ContentValues contentValues = getContentValues(crime);
         database.insert(CrimeTable.NAME, null, contentValues);
