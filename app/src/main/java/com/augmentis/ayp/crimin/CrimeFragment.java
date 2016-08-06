@@ -2,6 +2,7 @@ package com.augmentis.ayp.crimin;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -14,6 +15,7 @@ import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
+import android.telecom.Call;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
@@ -70,10 +72,9 @@ public class CrimeFragment extends Fragment {
     private CheckBox crimeSolvedCheckbox;
     private Button crimeSuspectButton;
     private Button crimeCallSuspectButton;
-    private Button deleteCrimeButton;
     private ImageButton photoButton;
     private ImageView photoView;
-
+    private CallBacks callBacks;
 
     private boolean isOnAddNewCrime;
 
@@ -90,14 +91,36 @@ public class CrimeFragment extends Fragment {
         return crimeFragment;
     }
 
+    // Callback
+    public interface CallBacks {
+        void onCrimeUpdated(Crime crime);
+        void onCrimeDeleted();
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        callBacks = null;
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        callBacks = (CallBacks) context;
+    }
+
+    private void reloadCrimeFromDB(){
+        CrimeLab crimeLab = CrimeLab.getInstance(getActivity());
+        UUID crimeId = (UUID) getArguments().getSerializable(CRIME_ID);
+        crime = crimeLab.getCrimeById(crimeId);
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-        CrimeLab crimeLab = CrimeLab.getInstance(getActivity());
-        UUID crimeId = (UUID) getArguments().getSerializable(CRIME_ID);
-        crime = crimeLab.getCrimeById(crimeId);
-        photoFile = crimeLab.getPhotoFile(crime);
+        reloadCrimeFromDB();
+        photoFile = CrimeLab.getInstance(getActivity()).getPhotoFile(crime);
     }
 
     private void editTextCrimeSetting() {
@@ -111,6 +134,7 @@ public class CrimeFragment extends Fragment {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 crime.setTitle(s.toString());
+                updateCrime();
             }
 
             @Override
@@ -154,7 +178,11 @@ public class CrimeFragment extends Fragment {
         crimeSolvedCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                crime.setSolved(isChecked);
+                if (buttonView.isPressed()) {
+                    crime.setSolved(isChecked);
+                    updateCrime();
+                }
+                callBacks.onCrimeUpdated(crime);
             }
         });
     }
@@ -177,11 +205,11 @@ public class CrimeFragment extends Fragment {
 
     private void crimeSuspectButtonSetting() {
         final Intent pickContact = new Intent(Intent.ACTION_PICK, ContactsContract.CommonDataKinds.Phone.CONTENT_URI);
-        Log.d("ggwp", "uri: CommonDataKinds.Phone.CONTENT_FILTER_URI --> " + ContactsContract.CommonDataKinds.Phone.CONTENT_FILTER_URI);
-        Log.d("ggwp", "uri: CommonDataKinds.Phone.CONTENT_URI --> " + ContactsContract.CommonDataKinds.Phone.CONTENT_URI);
-        Log.d("ggwp", "uri: Contacts.DISPLAY_NAME --> " + ContactsContract.Contacts.DISPLAY_NAME);
-        Log.d("ggwp", "uri: CommonDataKinds.Phone.TYPE_MOBILE --> " + ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE);
-        Log.d("ggwp", "uri: CommonDataKinds.Identity.DISPLAY_NAME --> " + ContactsContract.CommonDataKinds.Identity.DISPLAY_NAME);
+//        Log.d("ggwp", "uri: CommonDataKinds.Phone.CONTENT_FILTER_URI --> " + ContactsContract.CommonDataKinds.Phone.CONTENT_FILTER_URI);
+//        Log.d("ggwp", "uri: CommonDataKinds.Phone.CONTENT_URI --> " + ContactsContract.CommonDataKinds.Phone.CONTENT_URI);
+//        Log.d("ggwp", "uri: Contacts.DISPLAY_NAME --> " + ContactsContract.Contacts.DISPLAY_NAME);
+//        Log.d("ggwp", "uri: CommonDataKinds.Phone.TYPE_MOBILE --> " + ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE);
+//        Log.d("ggwp", "uri: CommonDataKinds.Identity.DISPLAY_NAME --> " + ContactsContract.CommonDataKinds.Identity.DISPLAY_NAME);
 
         crimeSuspectButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -215,8 +243,8 @@ public class CrimeFragment extends Fragment {
         switch (item.getItemId()) {
             case R.id.menu_item_delete_crime:
                 CrimeLab.getInstance(getActivity()).deleteCrime(crime.getId());
-                getActivity().finish();
-               return true;
+                callBacks.onCrimeDeleted();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -229,7 +257,7 @@ public class CrimeFragment extends Fragment {
     }
 
 
-    private void photoViewSetting(){
+    private void photoViewSetting() {
         photoView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -280,7 +308,7 @@ public class CrimeFragment extends Fragment {
         boolean canTakePhoto = photoFile != null
                 && captureImageIntent.resolveActivity(getActivity().getPackageManager()) != null;
 
-        if(canTakePhoto){
+        if (canTakePhoto) {
             Uri uri = Uri.fromFile(photoFile);
             captureImageIntent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
         }
@@ -310,11 +338,11 @@ public class CrimeFragment extends Fragment {
         callSuspect();
     }
 
-    private void updatePhotoView(){
-        if(photoFile == null || !photoFile.exists()){
+    private void updatePhotoView() {
+        if (photoFile == null || !photoFile.exists()) {
             photoView.setImageDrawable(null);
-        }else {
-            Bitmap bitmap = PictureUtils.getScaledBitmap( photoFile.getPath(),
+        } else {
+            Bitmap bitmap = PictureUtils.getScaledBitmap(photoFile.getPath(),
                     getActivity());
 
             photoView.setImageBitmap(bitmap);
@@ -357,11 +385,13 @@ public class CrimeFragment extends Fragment {
             Date date = (Date) data.getSerializableExtra(DatePickerFragment.EXTRA_DATE);
             crime.setCrimeDate(date);
             crimeDateButton.setText(crime.getSimpleDateFormat(crime.getCrimeDate()));
+            updateCrime();
         }
         if (requestCode == REQUEST_TIME) {
             Date date = (Date) data.getSerializableExtra(TimePickerFragment.EXTRA_TIME);
             crime.setCrimeDate(date);
             crimeTimeButton.setText(crime.getSimpleTimeFormat(crime.getCrimeDate()));
+            updateCrime();
         }
         if (requestCode == REQUEST_CONTACT_SUSPECT) {
             if (data != null) {
@@ -395,7 +425,7 @@ public class CrimeFragment extends Fragment {
             }
         }
 
-        if (requestCode == REQUEST_CAPTURE_PHOTO){
+        if (requestCode == REQUEST_CAPTURE_PHOTO) {
             updatePhotoView();
         }
     }
@@ -403,7 +433,28 @@ public class CrimeFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        CrimeLab.getInstance(getActivity()).updateCrime(crime); // update crime in db
+//        updateCrime();
+//        CrimeLab.getInstance(getActivity()).updateCrime(crime); // update crime in db
+    }
+
+    public UUID getCrimeId(){
+        if(this.crime != null) {
+            return this.crime.getId();
+        }
+        else {
+            return null;
+        }
+    }
+
+    public void updateUI(){
+        reloadCrimeFromDB();
+        crimeSolvedCheckbox.setChecked(crime.isSolved());
+    }
+
+
+    private void updateCrime() {
+        CrimeLab.getInstance(getActivity()).updateCrime(crime);
+        callBacks.onCrimeUpdated(crime);
     }
 
     private String getCrimeReported() {

@@ -33,4 +33,15 @@
         android:padding="4dp"
         tools:text="Crime date" />
 
+    <ImageView
+        android:id="@+id/list_item_crime_photo_image_view"
+        android:layout_width="32px"
+        android:layout_height="32px"
+        android:scaleType="centerInside"
+        android:background="@android:color/darker_gray"
+        android:cropToPadding="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="10dp"/>
+
 </RelativeLayout>

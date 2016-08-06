@@ -1,6 +1,8 @@
 package com.augmentis.ayp.crimin;
 
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -16,11 +18,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.augmentis.ayp.crimin.model.Crime;
 import com.augmentis.ayp.crimin.model.CrimeLab;
+import com.augmentis.ayp.crimin.model.PictureUtils;
 
+import java.io.File;
 import java.util.List;
 
 
@@ -38,6 +43,23 @@ public class CrimeListFragment extends Fragment {
     protected static final String TAG = "CRIME_LIST";
 
     private boolean _subtitleVisible;
+    private Callbacks callbacks;
+
+    public interface Callbacks{
+        void onCrimeSelected(Crime crime, boolean isNewCrime);
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        callbacks = (Callbacks) context; // activity
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        callbacks = null;
+    }
 
     @Nullable
     @Override
@@ -71,6 +93,10 @@ public class CrimeListFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        if(CrimeLab.getInstance(getActivity()).getCrimes().size() > 0) {
+            callbacks.onCrimeSelected(CrimeLab.getInstance(getActivity()).getCrimes().get(0), false);
+        }
+
         setHasOptionsMenu(true);
     }
 
@@ -80,8 +106,11 @@ public class CrimeListFragment extends Fragment {
             case R.id.menu_item_new_crime:
                 Crime crime = new Crime();
                 CrimeLab.getInstance(getActivity()).addCrime(crime);
-                Intent intent = CrimePagerActivity.newIntent(getActivity(), crime.getId(), true);
-                startActivity(intent);
+
+                // support table
+                updateUI();
+                callbacks.onCrimeSelected(crime, true);
+
                 return true;
             case R.id.menu_item_show_subtitle:
                 _subtitleVisible = !_subtitleVisible;
@@ -93,7 +122,7 @@ public class CrimeListFragment extends Fragment {
         }
     }
 
-    private void updateUI() {
+    public void updateUI() {
         CrimeLab crimeLab = CrimeLab.getInstance(getActivity());
         List<Crime> crimes = crimeLab.getCrimes();
         if (_adapter == null) {
@@ -139,6 +168,8 @@ public class CrimeListFragment extends Fragment {
         public TextView _titleTextView;
         public TextView _dateTextView;
         public CheckBox _solvedCheckBox;
+        public ImageView _crimePhotoView;
+
         int _position;
 
         Crime _crime;
@@ -148,7 +179,7 @@ public class CrimeListFragment extends Fragment {
             _titleTextView = (TextView) itemView.findViewById(R.id.list_item_crime_title_text_view);
             _solvedCheckBox = (CheckBox) itemView.findViewById(R.id.list_item_crime_solved_check_box);
             _dateTextView = (TextView) itemView.findViewById(R.id.list_item_crime_date_text_view);
-
+            _crimePhotoView = (ImageView) itemView.findViewById(R.id.list_item_crime_photo_image_view);
             itemView.setOnClickListener(this);
         }
 
@@ -156,12 +187,18 @@ public class CrimeListFragment extends Fragment {
             _crime = crime;
             _position = position;
             _titleTextView.setText(_crime.getTitle());
+            File photoFile = CrimeLab.getInstance(getActivity()).getPhotoFile(_crime);
+            Bitmap bitmap = PictureUtils.getScaledBitmap(photoFile.getPath(), getActivity());
+            _crimePhotoView.setImageBitmap(bitmap);
             _solvedCheckBox.setChecked(_crime.isSolved());
             _solvedCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    _crime.setSolved(isChecked);
-                    CrimeLab.getInstance(getActivity()).updateCrime(_crime);
+                    if(buttonView.isPressed()) {
+                        _crime.setSolved(isChecked);
+                        CrimeLab.getInstance(getActivity()).updateCrime(_crime);
+                        callbacks.onCrimeSelected(_crime, false);
+                    }
                 }
             });
             _dateTextView.setText(_crime.getCrimeDate().toString());
@@ -169,10 +206,10 @@ public class CrimeListFragment extends Fragment {
 
         @Override
         public void onClick(View v) {
-            Intent intent = CrimePagerActivity.newIntent(getActivity(), _crime.getId(), false);
-            startActivity(intent);
+            callbacks.onCrimeSelected(_crime, false);
         }
     }
+
 
 
     private class CrimeAdapter extends RecyclerView.Adapter<CrimeHolder> {
